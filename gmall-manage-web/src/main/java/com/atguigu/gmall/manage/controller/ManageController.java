@@ -10,4 +10,7 @@ public class ManageController {
     public String index(){
         return "index";
     }
+
+
+
 }

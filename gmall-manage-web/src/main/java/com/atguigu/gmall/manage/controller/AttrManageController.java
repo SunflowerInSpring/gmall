@@ -1,13 +1,17 @@
 package com.atguigu.gmall.manage.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
-import com.atguigu.gmall.bena.*;
+import com.atguigu.gmall.bean.*;
+import com.atguigu.gmall.service.ListService;
 import com.atguigu.gmall.service.ManageService;
+import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +19,25 @@ import java.util.Map;
 public class AttrManageController {
     @Reference
     private ManageService manageService;
+    @Reference
+    private ListService listService;
+
+    @RequestMapping(value = "onSale",method = RequestMethod.GET)
+    @ResponseBody
+    public void onSale(String skuId){
+        SkuLsInfo skuLsInfo = new SkuLsInfo();
+        SkuInfo skuInfo = manageService.getSkuInfo(skuId);
+        try {
+            BeanUtils.copyProperties(skuLsInfo,skuInfo);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        listService.saveSkuInfo(skuLsInfo);
+    }
+
+
 
     @RequestMapping("attrListPage")
     public String getAttrListPage(){
@@ -39,26 +62,15 @@ public class AttrManageController {
        List<BaseAttrValue> attrInfo = manageService.getAttrInfo(attrId);
        return attrInfo;
     }
-    /**
-     *更新属性
-     */
-    @RequestMapping("updateAttr")
-    @ResponseBody
-    public String BaseAttrInfo(BaseAttrInfo baseAttrInfo){
-        manageService.saveAttr(baseAttrInfo);
-        return "编辑成功";
-    }
-
-
 
     /**
-     * 添加属性
+     *编辑and添加属性
      */
     @RequestMapping("saveAttrInfo")
     @ResponseBody
-    public String saveAttrInfo(BaseAttrInfo baseAttrInfo){
+    public void saveAttrInfo(BaseAttrInfo baseAttrInfo){
         manageService.saveAttrInfo(baseAttrInfo);
-        return "保存成功";
+
     }
 
     /**

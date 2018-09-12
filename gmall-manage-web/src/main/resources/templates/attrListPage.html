@@ -5,6 +5,7 @@
     <title>Insert title here</title>
 </head>
 <body>
+
 <table id="dg" class="easyui-datagrid" title="属性列表"
        data-options="singleSelect:true ,method:'get',toolbar:'#tb'">
 
@@ -68,64 +69,74 @@ $('#ctg3ForAttrList').combobox('clear');
     </form>
 </div>
 
-<div id="bj" class="easyui-dialog" title="编辑属性" style="width:600px;height:400px;"
-     data-options="iconCls:'icon-save',resizable:true,closed:true,modal:true" buttons="#cc" >
-    <form id="attrForm1">
-        <br/>
-        <label>属性名称:</label>
-        <input  id="attrName1" name="attrName" class="easyui-textbox" data-options="" style="width:100px"/>
-        <input  id="attrId1" name="attrId" type="hidden"  />
-        <br/><br/>
-        <table id="dg_aa" class="easyui-datagrid"
-               style="width:100%;height:100%"
-               data-options="url:'',title:'平台属性值列表',fitColumns:true,singleSelect:true,method:'get'">
-            <thead>
-            <tr>
-                <th data-options="field:'id'" width="20%">属性id </th>
-                <th data-options="field:'attrName'" width="80%">属性名</th>
-            </tr>
-            </thead>
 
-        </table>
-    </form>
-</div>
 
 <div id="bb">
     <a href="#" class="easyui-linkbutton" onclick="saveAttr()">保存</a>
-    <a href="#" class="easyui-linkbutton">关闭</a>
-</div>
-<div id="cc">
-    <a href="#" class="easyui-linkbutton" onclick="updateAttr()">保存</a>
     <a href="#" class="easyui-linkbutton">关闭</a>
 </div>
 
 
 
 <script type="text/javascript">
+/*    $('#p').progressbar({
+        value: 60
+    });
+    var value = $('#p').progressbar('getValue');
+
+    var i = 0;
+        setInterval(function(){
+            $('#p').progressbar('setValue', i++);
+        },500)*/
+
+
+
 
     function deleteAttrInfo(){
-        alert($('#dg').datagrid('getSelected').id);
-        var attrJson ={};
-        attrJson["id"]= $('#dg').datagrid('getSelected').id;
-        //ajax 保存到后台
-        $.post("deleteAttrInfo",attrJson,function(data){
-            $("#dg").datagrid("reload");
-            alert(data);
-        })
+        var row = $('#dg').datagrid('getSelected');
+        if(row==null){
+            $.messager.alert('警告','请选择属性');
+            return false;
+        }
+
+        $.messager.confirm('确认','您确认想要删除吗？',function(r){
+            if (r){
+
+                var attrJson ={};
+                attrJson["id"]= $('#dg').datagrid('getSelected').id;
+                //ajax 保存到后台
+                $.post("deleteAttrInfo",attrJson,function(data){
+                    $("#dg").datagrid("reload");
+                })
+
+                alert('已删除');
+            }
+        });
+
+
     }
 
     function updateAttrInfo(){
+
         var row = $('#dg').datagrid('getSelected');
-        $("#attrName1").textbox('setValue',row.attrName)
-        $("#bj").dialog("open");
-        initAttrInfoValueDg1();
-        $('#dg_aa').datagrid('reload','getAttrValueList?attrId='+row.id);
-        alert(row.id);
+        if(row==null){
+            $.messager.alert('警告','请选择属性');
+            return false;
+        }
+        $("#dlg").dialog("open");
+        initAttrInfoValueDg();
+        $("#attrName").textbox('setValue',row.attrName);
+   /*     $("#attrId").textbox('setValue',row.id);*/
+        $('#dg_av').datagrid('reload','getAttrValueList?attrId='+row.id);
+
     }
 
     function addAttrInfo(){
-
-
+        var data=$("#ctg3ForAttrList").combobox("getValue");
+        if(data){
+            $.messager.alert('警告','选择第三级分类');
+            return false;
+        }
         //弹出框
         $("#dlg").dialog("open");
         initAttrInfoValueDg();
@@ -183,64 +194,6 @@ $('#ctg3ForAttrList').combobox('clear');
 
 
 
-
-
-    function initAttrInfoValueDg1(){
-        $('#dg_aa').datagrid('loadData', { total: 0, rows: [] });
-        var attrInfoValueDg = $('#dg_aa').datagrid({
-            url:'',
-            columns:[[
-                {field:'id',title:'编号',width:100},
-                {field:'valueName',title:'属性值名称',width:100,
-                    editor: {
-                        type: 'validatebox', options: { required: true}  //必填项
-                    }
-                }
-            ]] ,
-            toolbar: [{
-                iconCls: 'icon-add',
-                text:'添加',
-                handler: function(){
-                    $('#dg_aa').datagrid('appendRow',{
-                        id: '',
-                        valueName: ''
-                    });
-
-
-
-                }
-            },'-',{
-                iconCls: 'icon-remove',
-                text:'删除',
-                handler: function(){
-                    var row = $('#dg_aa').datagrid('getSelected');
-                    var index = $('#dg_aa').datagrid('getRowIndex',row);
-                    $('#dg_aa').datagrid('deleteRow',index);
-                }
-            }],
-            onDblClickRow: function (rowIndex, rowData) {
-                //双击开启编辑行
-                attrInfoValueDg.datagrid("beginEdit", rowIndex);
-                //设定当失去焦点时,退出编辑状态
-                var valueName = rowData.valueName;
-                $("input.datagrid-editable-input").val(valueName).bind("blur",function(evt){
-                    attrInfoValueDg.datagrid('endEdit',rowIndex);
-                });
-            }
-
-
-
-
-        });
-
-    }
-
-
-
-
-
-
-
     function saveAttr(){
         var attrJson ={} ;
         //把表格中的数据循环组合成json
@@ -248,10 +201,12 @@ $('#ctg3ForAttrList').combobox('clear');
         for (var i = 0; i < attrValueRows.length; i++) {
             //技巧：与bean中的属性同名可以借助springmvc直接注入到实体bean中，即使是list也可以。
             attrJson["attrValueList["+i+"].valueName"]=attrValueRows[i].valueName;
+
         }
 
         attrJson["attrName"]=$("#attrName").val();
 
+        attrJson["id"]=$('#dg').datagrid('getSelected').id;
         attrJson["catalog3Id"]=$("#ctg3ForAttrList").combobox('getValue');
 
         console.log("attrJson="+JSON.stringify(attrJson));
@@ -262,32 +217,6 @@ $('#ctg3ForAttrList').combobox('clear');
             $("#dg").datagrid("reload");
         })
     }
-
-
-    function updateAttr(){
-
-        var attrJson ={} ;
-        //把表格中的数据循环组合成json
-        var attrValueRows= $("#dg_aa").datagrid('getRows') ;
-        for (var i = 0; i < attrValueRows.length; i++) {
-            //技巧：与bean中的属性同名可以借助springmvc直接注入到实体bean中，即使是list也可以。
-            attrJson["attrValueList["+i+"].valueName"]=attrValueRows[i].valueName;
-        }
-        attrJson["catalog3Id"]=$("#ctg3ForAttrList").combobox('getValue');
-        attrJson["id"]=$('#dg').datagrid('getSelected').id;
-        console.log("attrJson="+JSON.stringify(attrJson));
-
-        //ajax 保存到后台
-        $.post("updateAttr",attrJson,function(data){
-            $("#bj").dialog("close");
-            $("#dg").datagrid("reload");
-        })
-    }
-
-
-
-
-
 
 </script>
 

@@ -6,6 +6,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan(basePackages = "com.atguigu.gmall")
+
 public class GmallOrderWebApplication {
 
 	public static void main(String[] args) {

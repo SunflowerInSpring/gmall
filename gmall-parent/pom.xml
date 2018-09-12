@@ -11,9 +11,10 @@
         <module>../gmall-bean</module>
         <module>../gmall-interface</module>
         <module>../gmall-common-util</module>
-        <module>../gmall-service-util</module>
+
         <module>../gmall-web-util</module>
         <module>../gmall-user-manage</module>
+        <module>../gamll-service-util</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -192,7 +193,6 @@
                 <artifactId>spring-boot-starter-dubbo</artifactId>
                 <version>${dubbo-starter.version}</version>
             </dependency>
-
 
         </dependencies>
     </dependencyManagement>

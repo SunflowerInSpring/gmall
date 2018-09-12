@@ -1,6 +1,6 @@
 package com.atguigu.gmall.usermanage.mapper;
 
-import com.atguigu.gmall.bena.UserAddress;
+import com.atguigu.gmall.bean.UserAddress;
 import tk.mybatis.mapper.common.Mapper;
 
 
